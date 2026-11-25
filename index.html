@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f4c81" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>STG 4th Ed. Clinical CDS App</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: #eef3f8; color: #111827; padding: 12px; }
+    .app { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 6px 20px rgba(15, 76, 129, 0.08); }
+    .top-bar { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+    h1 { font-size: 1.18rem; margin: 0 0 4px; color: #0f4c81; }
+    .sub { font-size: 0.83rem; color: #4b5563; margin-bottom: 12px; }
+    .pill-usage { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-size: 0.78rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+    .nav-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+    .tab-btn { padding: 7px 11px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+    .tab-btn.active { background: #0f4c81; color: #fff; border-color: #0f4c81; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-bottom: 12px; background: #fafafa; }
+    .card h3 { margin: 12px 0 6px; font-size: 0.95rem; color: #1f2937; }
+    .card h3:first-child { margin-top: 0; }
+    label { display: block; font-size: 0.82rem; font-weight: 600; margin: 6px 0 3px; }
+    input, select, textarea { width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; background: #fff; }
+    textarea { min-height: 65px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn { width: 100%; padding: 11px; border: none; border-radius: 9px; font-size: 0.95rem; font-weight: 700; cursor: pointer; background: #0f4c81; color: #fff; margin-top: 8px; }
+    .btn-secondary { background: #e5e7eb; color: #111827; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .chip { padding: 8px 12px; border-radius: 20px; border: 1px solid #94a3b8; background: #fff; font-size: 0.85rem; cursor: pointer; }
+    .chip.active { background: #0f4c81; color: #fff; border-color: #0f4c81; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .badge { display: inline-block; background: #e0f2fe; color: #0369a1; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; }
+    .plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .plan-box { border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; background: #fff; }
+    ul { margin: 6px 0 12px; padding-left: 18px; }
+    li { margin-bottom: 6px; font-size: 0.9rem; line-height: 1.4; }
+    .note-warn { font-size: 0.78rem; color: #6b7280; margin-top: 10px; }
+    .cc-tag { font-size: 0.82rem; color: #0369a1; background: #f0f9ff; border: 1px solid #bae6fd; padding: 6px 10px; border-radius: 8px; margin-bottom: 8px; }
+    .alert-box { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; border-radius: 9px; padding: 10px; margin-bottom: 10px; font-size: 0.86rem; }
+    .teach-box { background: #f0f9ff; border: 1px solid #bae6fd; color: #0c4a6e; border-radius: 9px; padding: 10px; margin-bottom: 10px; font-size: 0.88rem; }
+    .lock-banner { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; border-radius: 9px; padding: 10px; margin-bottom: 10px; font-size: 0.85rem; }
+    .export-box { background: #111827; color: #f9fafb; border-radius: 8px; padding: 10px; font-size: 0.78rem; white-space: pre-wrap; word-break: break-word; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top-bar">
+      <div>
+        <h1>STG 4th Ed. Clinical CDS App</h1>
+        <div class="sub">Web + App Ready • Ethiopian STG 4th Edition Teaching & Clinical Decision Support</div>
+      </div>
+      <div id="usagePill" class="pill-usage">Cases Completed: 0</div>
+    </div>
+
+    <div class="nav-tabs">
+      <button type="button" class="tab-btn active" onclick="switchView('clinicalView', this)">Clinical Workflow</button>
+      <button type="button" class="tab-btn" onclick="switchView('subView', this)">Usage & Billing</button>
+      <button type="button" class="tab-btn" onclick="switchView('adminView', this)">Owner Update</button>
+    </div>
+
+    <div id="clinicalView" class="view active">
+      <div id="step1" class="step active">
+        <span class="badge">Step 1 of 4 • 3 Spaces</span>
+
+        <div class="card">
+          <h3>1. Patient Demographics & Ward (Optional)</h3>
+          <div class="row">
+            <div><label for="age">Age (Optional)</label><input id="age" type="text" placeholder="e.g. 26" /></div>
+            <div><label for="weight">Weight kg (Optional)</label><input id="weight" type="number" step="0.1" placeholder="e.g. 55" /></div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="sex">Sex (Optional)</label>
+              <select id="sex">
+                <option value="">Not specified</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+              </select>
+            </div>
+            <div>
+              <label for="ward">Ward / Section (Optional)</label>
+              <select id="ward">
+                <option value="">Auto / All Wards</option>
+                <option value="pediatrics">Pediatrics & Neonatal</option>
+                <option value="gynecology">Gynecology & Obstetrics</option>
+                <option value="surgical">Surgical & Trauma</option>
+                <option value="medical">Medical & Neuro/Metabolic</option>
+                <option value="psychiatry">Psychiatry</option>
+                <option value="palliative">20. Palliative Care</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>2. Vital Signs</h3>
+          <div class="row">
+            <div><label for="bp">BP (mmHg)</label><input id="bp" type="text" placeholder="e.g. 90/60" /></div>
+            <div><label for="pr">PR</label><input id="pr" type="text" placeholder="88" /></div>
+          </div>
+          <div class="row">
+            <div><label for="rr">RR</label><input id="rr" type="text" placeholder="15" /></div>
+            <div><label for="temp">Temp (°C)</label><input id="temp" type="text" placeholder="36" /></div>
+          </div>
+          <div><label for="spo2">SpO2 (%)</label><input id="spo2" type="text" placeholder="96" /></div>
+        </div>
+
+        <div class="card">
+          <h3>3. Chief Complaint & Duration</h3>
+          <label for="cc">ዋና የህመም ቅሬታ (Chief Complaint)</label>
+          <textarea id="cc" placeholder="ለምሳሌ፡ Diarrhea, Stroke, ACS, Sepsis, Meningitis, Fracture"></textarea>
+          <label for="ccDuration">የህመሙ ቆይታ (Duration)</label>
+          <input id="ccDuration" type="text" placeholder="ለምሳሌ፡ 2 days" />
+        </div>
+
+        <button type="button" class="btn" id="step1NextBtn" onclick="goStep2()">Enter →</button>
+      </div>
+
+      <div id="step2" class="step">
+        <span class="badge">Step 2 of 4 • Characterizing & Associated Symptoms</span>
+        <div class="card">
+          <div id="ccContextBanner" class="cc-tag"></div>
+          <h3>Chief Complaint-ን የሚለዩ (Characterize የሚያደርጉ) ምልክቶች ምረጥ (Click)</h3>
+          <div id="symptomChips" class="chips"></div>
+        </div>
+        <button type="button" class="btn" onclick="goStep3()">Enter →</button>
+        <button type="button" class="btn btn-secondary" onclick="showStep('step1')">← Back</button>
+      </div>
+
+      <div id="step3" class="step">
+        <span class="badge">Step 3 of 4 • Investigations & Results</span>
+        <div id="investigationList"></div>
+        <button type="button" class="btn" onclick="goStep4()">Enter →</button>
+        <button type="button" class="btn btn-secondary" onclick="showStep('step2')">← Back</button>
+      </div>
+
+      <div id="step4" class="step">
+        <span class="badge">Step 4 of 4 • STG 4th Ed. Teaching & Clinical Summary</span>
+        <div class="card" id="finalSummary"></div>
+        <button type="button" class="btn" onclick="resetApp()">New Patient Case</button>
+      </div>
+    </div>
+
+    <div id="subView" class="view">
+      <div class="card">
+        <h3>Usage-Based & Subscription Plans (ETB • Chapa / Telebirr)</h3>
+        <p id="usageDetailText" style="font-size:0.86rem;color:#374151;"></p>
+        <div class="plan-grid">
+          <div class="plan-box"><strong>Case Pack (25 Cases)</strong><br/>Usage Metered • 100 ETB<button type="button" class="btn" onclick="selectPlan('Case Pack (25 Cases — 100 ETB)')">Select</button></div>
+          <div class="plan-box"><strong>Weekly Pass</strong><br/>7 Days • 150 ETB<button type="button" class="btn" onclick="selectPlan('Weekly Pass (7 Days — 150 ETB)')">Select</button></div>
+          <div class="plan-box"><strong>Monthly Plan</strong><br/>30 Days • 450 ETB<button type="button" class="btn" onclick="selectPlan('Monthly Plan (30 Days — 450 ETB)')">Select</button></div>
+          <div class="plan-box"><strong>Annual Plan</strong><br/>365 Days • 4,000 ETB<button type="button" class="btn" onclick="selectPlan('Annual Plan (365 Days — 4,000 ETB)')">Select</button></div>
+        </div>
+        <p id="planStatus" style="margin-top:10px;font-size:0.88rem;color:#0369a1;"></p>
+        <p class="note-warn">For enforced per-use billing and payment verification across all users, connect a backend service (/api/subscriptions/checkout & /api/usage/consume) with Chapa or Telebirr webhooks.</p>
+      </div>
+    </div>
+
+    <div id="adminView" class="view">
+      <div class="card">
+        <h3>Owner-Only STG 4th Edition Update Format</h3>
+        <div id="ownerLockSection">
+          <div class="lock-banner"><strong>Owner Access Protected:</strong> Enter your Owner PIN to unlock STG 4th Edition updates and export format. (Initial PIN: <code>2026</code> — you can change it once unlocked.)</div>
+          <label for="ownerPinInput">Owner PIN</label>
+          <input id="ownerPinInput" type="password" placeholder="Enter Owner PIN" />
+          <button type="button" class="btn" onclick="unlockOwnerPanel()">Unlock Owner Panel</button>
+          <p id="ownerLockMsg" style="margin-top:8px;font-size:0.86rem;color:#b91c1c;"></p>
+        </div>
+
+        <div id="ownerEditorSection" style="display:none;">
+          <p style="font-size:0.84rem;color:#065f46;font-weight:700;">Owner Mode Unlocked</p>
+          <label for="admWard">Ward / Section</label>
+          <select id="admWard">
+            <option value="pediatrics">Pediatrics & Neonatal</option>
+            <option value="gynecology">Gynecology & Obstetrics</option>
+            <option value="surgical">Surgical & Trauma</option>
+            <option value="medical">Medical & Neuro/Metabolic</option>
+            <option value="psychiatry">Psychiatry</option>
+            <option value="palliative">20. Palliative Care</option>
+          </select>
+          <label for="admTitle">Section / Condition Title</label>
+          <input id="admTitle" type="text" placeholder="e.g. Updated STG 4th Ed. Protocol Title" />
+          <label for="admNote">First-Line / Second-Line / Surgical / Care Note</label>
+          <textarea id="admNote" placeholder="Enter STG 4th Edition update note..."></textarea>
+          <button type="button" class="btn" onclick="saveAdminStg()">Save & Generate Update Format</button>
+          <p id="adminMsg" style="margin-top:8px;font-size:0.88rem;color:#047857;"></p>
+
+          <label for="newOwnerPin">Change Owner PIN (Optional)</label>
+          <input id="newOwnerPin" type="text" placeholder="Enter new Owner PIN (e.g. 8899)" />
+          <button type="button" class="btn btn-secondary" onclick="changeOwnerPin()">Update Owner PIN</button>
+          <button type="button" class="btn btn-secondary" onclick="lockOwnerPanel()">Lock Owner Panel</button>
+
+          <h3>Structured Update Format (For Global Release / Documentation)</h3>
+          <div id="updateExportSnippet" class="export-box">No custom update generated yet. Fill Title & Note above and click "Save & Generate Update Format".</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const wardGuides = {
+      medical: {
+        symptoms: [
+          "Frequent watery stools OR bloody/mucoid stools with tenesmus/cramping (dysentery)",
+          "Vomiting / thirst / sunken eyes / dry mucous membranes / decreased urine output",
+          "Fever / abdominal pain / signs of severe dehydration or shock",
+          "Fever / Chills / Neck stiffness / Photophobia",
+          "Headache / Focal weakness / Speech slurring / Seizure",
+          "Chest pain / Shortness of breath / Orthopnea / Wheezing",
+          "Epigastric / Abdominal pain / Jaundice / Pallor / Fatigue / Edema"
+        ],
+        investigations: [
+          { id: "cbc", name: "CBC / RBG / Ketones / RFT-LFT-TSH / Stool", options: ["None", "Elevated WBC / High Glucose-Ketones", "Low Hb (Anemia)", "Deranged RFT/LFT/TSH or Stool abnormality", "Normal"] },
+          { id: "cxr", name: "Chest X-Ray / ECG / Brain CT / LP-CSF", options: ["None", "Abnormal / Meningeal-CNS-Cardiac-Chest finding", "Normal"] },
+          { id: "lab", name: "Targeted Lab / Malaria / TB-HIV / Blood Culture / Urinalysis", options: ["None", "Positive / Abnormal", "Normal"] }
+        ]
+      },
+      pediatrics: {
+        symptoms: ["Fever / Hypothermia", "Fast breathing / Chest indrawing", "Cough / Wheezing", "Poor feeding / Poor suck / Lethargy", "Vomiting / Diarrhea / Dehydration", "Convulsions / Neck stiffness / Bulging fontanelle", "Neonatal jaundice / Cyanosis"],
+        investigations: [
+          { id: "cbc", name: "CBC / RBG / Bilirubin", options: ["None", "Elevated WBC / High Bilirubin", "Low Hb", "Normal"] },
+          { id: "malaria", name: "Malaria RDT / Blood Film / Sepsis Screen", options: ["None", "Positive", "Negative"] },
+          { id: "cxr", name: "Chest X-Ray / CSF / MUAC", options: ["None", "Abnormal / Positive", "Normal"] }
+        ]
+      },
+      gynecology: {
+        symptoms: ["Postpartum fever / Foul lochia / Lower abdominal or uterine tenderness", "Pelvic pain / Antepartum or Postpartum bleeding", "Vaginal discharge / Foul lochia", "Headache / Blurred vision / Epigastric pain", "Fluid leakage / PROM / Contractions", "Dysmenorrhea / Irregular cycles", "Dizziness / Syncope / Shoulder tip pain"],
+        investigations: [
+          { id: "preg", name: "Pregnancy / Antepartum / Postpartum Status", options: ["None", "Pregnant (Antenatal/APH/Intrapartum)", "Postpartum / Post-abortion", "Not pregnant / Gynecologic"] },
+          { id: "cbc", name: "CBC / Hemoglobin / Crossmatch", options: ["None", "Low Hb / Anemia", "Elevated WBC", "Normal"] },
+          { id: "us", name: "Pelvic / Obstetric Ultrasound & Urinalysis", options: ["None", "Abnormal / Placenta-Fetal-Retained tissue finding", "Normal"] }
+        ]
+      },
+      surgical: {
+        symptoms: ["Limb deformity / Pain / Swelling / Inability to bear weight (Fracture)", "Animal or snake bite / Wound / Lockjaw-spasms (Tetanus)", "Abdominal pain / Distension / Constipation / Guarding / Rebound", "Vomiting / Inability to pass flatus or stool / Groin swelling (Hernia)", "Abscess / Fluctuance / Cellulitis / Ear-Eye-Skin lesion", "Burns / Trauma / Bleeding / Wound pain"],
+        investigations: [
+          { id: "cbc", name: "CBC", options: ["None", "Elevated WBC", "Low Hb", "Normal"] },
+          { id: "imaging", name: "X-Ray (Limb/Chest/Abdomen) / Ultrasound / CT", options: ["None", "Fracture / Acute Surgical finding", "Normal"] },
+          { id: "labs", name: "Baseline Labs / Coagulation / Electrolytes", options: ["None", "Deranged", "Normal"] }
+        ]
+      },
+      psychiatry: {
+        symptoms: ["Insomnia / Decreased need for sleep", "Low mood / Anhedonia / Hopelessness", "Anxiety / Panic / Restlessness", "Elevated/irritable mood / Grandiosity", "Hallucinations / Delusions", "Tremors / Sweating / Alcohol or substance withdrawal", "Suicidal ideation / Risk"],
+        investigations: [
+          { id: "medscreen", name: "Medical / Metabolic / Thyroid / Substance Screen", options: ["None", "Abnormal / Positive", "Normal"] },
+          { id="mse", name: "Mental State & Risk Assessment", options: ["None", "High risk / Acute", "Moderate / Stable"] }
+        ]
+      },
+      palliative: {
+        symptoms: ["Pain (mild/moderate/severe)", "Fever", "Respiratory symptoms (dyspnea/secretions)", "GI symptoms (nausea/vomiting/constipation)", "Urinary symptoms (retention/dysuria)", "Skin problems (wound/pressure/itch)", "Infection signs", "Neuropsychiatric (delirium/anxiety/depression)", "Psychosocial distress", "Spiritual care needs", "End-of-life comfort needs"],
+        investigations: [
+          { id: "pal_assess", name: "Symptom Burden & Performance / Prognosis Check", options: ["None", "High symptom burden", "End-of-life phase", "Stable palliative"] },
+          { id: "pal_labs", name: "Targeted Lab / Infection / Imaging Check", options: ["None", "Positive / Abnormal", "Deferred for comfort"] }
+        ]
+      }
+    };
+
+    const STORAGE_KEY = "stg4_custom_ward_updates_v1";
+    const PIN_KEY = "stg4_owner_pin_v1";
+    const USAGE_KEY = "stg4_cases_completed_v1";
+
+    let customWardUpdates = {};
+    let ownerPin = "2026";
+    let casesCompleted = 0;
+
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) customWardUpdates = JSON.parse(saved);
+      const savedPin = localStorage.getItem(PIN_KEY);
+      if (savedPin) ownerPin = savedPin;
+      const savedUsage = localStorage.getItem(USAGE_KEY);
+      if (savedUsage) casesCompleted = parseInt(savedUsage, 10) || 0;
+    } catch (e) {}
+
+    const state = { demographics: null, vitals: {}, cc: "", ccDuration: "", symptoms: new Set(), invResults: {}, caseCountedThisRun: false };
+
+    function renderUsageUI() {
+      const pill = document.getElementById("usagePill");
+      if (pill) pill.textContent = `Cases Completed: ${casesCompleted}`;
+      const detail = document.getElementById("usageDetailText");
+      if (detail) detail.textContent = `Current session/device usage count: ${casesCompleted} clinical case(s) completed. Choose a usage pack or subscription plan below.`;
+    }
+
+    function parseBP(bpStr) {
+      if (!bpStr) return null;
+      const m = bpStr.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+      if (!m) return null;
+      return { sbp: parseInt(m[1], 10), dbp: parseInt(m[2], 10) };
+    }
+
+    function parseNum(str) {
+      if (!str) return null;
+      const m = String(str).match(/(\d+(?:\.\d+)?)/);
+      return m ? parseFloat(m[1]) : null;
+    }
+
+    function generateCharacterizingSymptoms(ccText, wardKey, vitals) {
+      const c = (ccText || "").toLowerCase();
+      const bp = parseBP(vitals?.bp || "");
+      const generated = [];
+
+      if (c.includes("dysenter") || c.includes("bloody") || c.includes("diarrhea") || c.includes("diarrhoea") || c.includes("cholera") || c.includes("gastroenterit")) {
+        generated.push(
+          "Frequent watery stools OR bloody/mucoid stools with tenesmus/cramping (dysentery)",
+          "Vomiting / thirst / sunken eyes / dry mucous membranes / decreased urine output",
+          "Fever / abdominal pain / signs of severe dehydration or shock"
+        );
+      }
+      if (c.includes("meningit") || c.includes("neck stiff") || c.includes("photophob") || c.includes("encephalit")) {
+        generated.push(
+          "Fever / headache / neck stiffness / photophobia (meningeal signs)",
+          "Altered mental status / confusion / drowsiness / seizures",
+          "Petechial or purpuric rash / focal neurologic deficit"
+        );
+      }
+      if (c.includes("fracture") || c.includes("bite") || c.includes("tetanus") || c.includes("trismus") || c.includes("lockjaw") || c.includes("spasm") || c.includes("snake") || c.includes("dog")) {
+        generated.push(
+          "Limb pain / swelling / deformity / crepitus / inability to bear weight or neurovascular deficit (Fracture)",
+          "Animal or snake bite puncture/laceration / local swelling or systemic envenomation signs",
+          "Jaw stiffness (trismus) / muscle spasms / wound contamination & tetanus immunization history"
+        );
+      }
+      if (c.includes("puerperal") || (c.includes("sepsis") && (wardKey === "gynecology" || c.includes("postpartum") || c.includes("delivery") || c.includes("lochia")))) {
+        generated.push(
+          "Postpartum/post-abortion fever / chills / rigors",
+          "Foul-smelling lochia / uterine tenderness / subinvolution / lower abdominal pain",
+          "Tachycardia / tachypnea / hypotension / lethargy"
+        );
+      }
+      if (c.includes("stroke") || c.includes("hemiparesis") || c.includes("weakness") || c.includes("slurr") || c.includes("speech") || c.includes("facial")) {
+        generated.push(
+          "Sudden focal limb weakness / hemiparesis / facial droop",
+          "Speech slurring / dysarthria / aphasia / visual field loss",
+          "Altered consciousness / severe headache / vomiting"
+        );
+      }
+      if (c.includes("chest pain") || c.includes("angina") || c.includes("acs") || c.includes("infarct") || c.includes("myocard")) {
+        generated.push(
+          "Retrosternal chest pain / pressure / tightness radiating to arm, jaw, or back",
+          "Associated sweating / nausea / shortness of breath / palpitations"
+        );
+      }
+      if (c.includes("sepsis") || c.includes("shock") || (bp && (bp.sbp < 90 || bp.dbp < 60))) {
+        generated.push(
+          "Fever or hypothermia / chills / rigors",
+          "Hypotension / tachycardia / tachypnea / altered mental status",
+          "Cool clammy extremities / prolonged capillary refill / low urine output"
+        );
+      }
+
+      const wardSyms = (wardGuides[wardKey] || wardGuides.medical).symptoms;
+      wardSyms.forEach(s => {
+        if (!generated.includes(s)) generated.push(s);
+      });
+
+      return generated.slice(0, 11);
+    }
+
+    function buildSafetyAlerts(vitals, demo, text) {
+      const alerts = [];
+      const bp = parseBP(vitals?.bp || "");
+      const pr = parseNum(vitals?.pr || "");
+      const rr = parseNum(vitals?.rr || "");
+      const temp = parseNum(vitals?.temp || "");
+      const spo2 = parseNum(vitals?.spo2 || "");
+      const pregText = text.includes("pregnant") || text.includes("antenatal") || text.includes("aph") || text.includes("preeclampsia") || text.includes("eclampsia") || text.includes("missed menstrual");
+      const isFemale = (demo?.sex || "").toLowerCase() === "female";
+
+      if (spo2 !== null && spo2 < 90) alerts.push(`HYPOXIA ALERT (SpO2 ${spo2}%): Administer supplemental oxygen immediately.`);
+      if (bp && (bp.sbp < 90 || bp.dbp < 60)) alerts.push(`BORDERLINE/LOW BP ALERT (BP ${vitals.bp} mmHg): Assess hydration, orthostasis, perfusion, and potential shock/dehydration source.`);
+      if (bp && (bp.sbp >= 180 || bp.dbp >= 120)) alerts.push(`SEVERE HYPERTENSION ALERT (BP ${vitals.bp} mmHg): Screen urgently for target-organ damage per STG 4th Ed.`);
+      if (temp !== null && temp >= 38.5) alerts.push(`HIGH FEVER ALERT (Temp ${temp}°C): Check for infection/sepsis/dehydration per STG 4th Ed.`);
+      if (pr !== null && pr > 110) alerts.push(`TACHYCARDIA ALERT (PR ${pr} bpm): Evaluate for dehydration, fever, anemia, or shock.`);
+      if (rr !== null && rr > 24) alerts.push(`TACHYPNEA ALERT (RR ${rr}/min): Evaluate for hypoxia, acidosis, or respiratory/systemic cause.`);
+      if (pregText || isFemale) {
+        alerts.push("PREGNANCY / REPRODUCTIVE SAFETY CHECK: Confirm pregnancy status when relevant and avoid pregnancy-contraindicated drugs (e.g., Doxycycline, Sodium Valproate, ACE inhibitors) per STG 4th Ed.");
+      }
+      return alerts;
+    }
+
+    function switchView(viewId, btn) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById(viewId).classList.add("active");
+      if (btn) btn.classList.add("active");
+      renderUsageUI();
+    }
+
+    function showStep(id) {
+      document.querySelectorAll(".step").forEach(el => el.classList.remove("active"));
+      const target = document.getElementById(id);
+      if (target) target.classList.add("active");
+      window.scrollTo(0, 0);
+    }
+
+    function getActiveGuide() {
+      const w = state.demographics?.ward || "medical";
+      return wardGuides[w] || wardGuides.medical;
+    }
+
+    function buildClinicalPlan(wardKey, ccText, durationText, symArr, invObj, demo, vitals) {
+      const text = `${ccText} ${durationText} ${symArr.join(" ")} ${Object.values(invObj).join(" ")}`.toLowerCase();
+      const wt = demo?.weight ? `${demo.weight} kg` : "patient weight (kg)";
+
+      if (text.includes("dysenter") || text.includes("bloody") || text.includes("diarrhea") || text.includes("diarrhoea") || text.includes("cholera") || text.includes("gastroenterit")) {
+        const isDysentery = text.includes("dysenter") || text.includes("bloody") || text.includes("mucoid");
+        return {
+          diagnosis: isDysentery
+            ? `Gastrointestinal Infection — Suspected Acute Dysentery — ${symArr.join(", ") || ccText} (${durationText || "Duration not specified"}) (STG 4th Ed.)`
+            : `Gastrointestinal Illness — Acute Diarrhea / Gastroenteritis (${durationText || "2 days"}) — ${symArr.join(", ") || ccText} (STG 4th Ed.)`,
+          clues: "Assess stool frequency/character (watery vs. bloody/mucoid), vomiting, thirst, mucous membranes, skin turgor, urine output, and BP (90/60 mmHg warrants careful hydration/perfusion check).",
+          rationale: "Fluid and electrolyte replacement (ORS or IV crystalloids if severe dehydration/shock) is primary across acute diarrhea; antibiotics are reserved for dysentery, cholera, or specific bacterial indications per STG 4th Ed.",
+          firstLine: [
+            `Oral Rehydration Salts (ORS) or Isotonic IV Crystalloid (0.9% Normal Saline / Ringer's Lactate if severe dehydration/shock) — Dose: titrated to dehydration severity & ongoing stool losses for ${wt} • Route: PO/IV • Duration: until rehydrated & ongoing replacement per stool.`,
+            isDysentery
+              ? `Ciprofloxacin (for acute dysentery in non-pregnant adults per STG 4th Ed.; or Azithromycin per local resistance/pregnancy) — Dose: 500 mg every 12 hours • Route: PO • Duration: 3–5 days.`
+              : `Targeted Antimicrobial (only if cholera or confirmed/suspected bacterial indication per STG 4th Ed.) — Dose: per STG 4th Ed. & ${wt} • Route: PO • Duration: per STG 4th Ed. protocol.`
+          ],
+          secondLine: [
+            `Azithromycin or Ceftriaxone (if fluoroquinolone resistance, pregnancy, or severe invasive/systemic illness per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO/IV • Duration: 3–5 days (or per clinical severity).`
+          ],
+          surgical: "Surgical Evaluation (STG 4th Ed.): Urgent surgical consultation if severe abdominal pain, guarding/rebound, abdominal distension, or suspected perforation/surgical abdomen occurs.",
+          nutrition: "Resume small, easily digestible meals and fluids as tolerated; avoid sugary drinks or high-osmolar fluids that worsen osmotic diarrhea.",
+          nonPharm: "Strict hand hygiene with soap and safe water/sanitation, monitor hydration & BP/PR/urine output, and seek urgent care for inability to keep fluids down, high fever, bloody stools, or dizziness/fainting."
+        };
+      }
+
+      return {
+        diagnosis: `Working Assessment: ${ccText} (${durationText || "Duration not specified"}) — ${symArr.join(", ") || "Characterizing symptoms pending"} (STG 4th Ed.)`,
+        clues: "Correlate chief complaint, duration, vital signs, characterizing symptoms, and investigations per STG 4th Edition.",
+        rationale: "Evidence-based stabilization and targeted STG 4th Edition therapy tailored to clinical presentation and patient parameters.",
+        firstLine: [
+          `Initiate appropriate first-line STG 4th Edition therapy — Dose: per STG 4th Ed. & ${wt} • Route: PO/IV as indicated • Duration: per confirmed diagnosis.`
+        ],
+        secondLine: [
+          `Escalate to second-line STG 4th Edition regimen if needed — Dose: per STG 4th Ed. • Route: per severity • Duration: per protocol.`
+        ],
+        surgical: "Evaluate for surgical/specialist indication if acute surgical signs or complications are present per STG 4th Ed.",
+        nutrition: "Maintain hydration and balanced nutrition appropriate to tolerance.",
+        nonPharm: "Monitor vitals and symptoms closely; seek prompt medical care if red flags develop."
+      };
+    }
+
+    function goStep2() {
+      const ccEl = document.getElementById("cc");
+      const cc = ccEl ? ccEl.value.trim() : "";
+      if (!cc) {
+        alert("እባክዎ Chief Complaint ያስገቡ።");
+        return;
+      }
+      state.cc = cc;
+      state.ccDuration = (document.getElementById("ccDuration")?.value || "").trim();
+      state.demographics = {
+        age: (document.getElementById("age")?.value || "").trim() || null,
+        weight: (document.getElementById("weight")?.value || "").trim() || null,
+        sex: document.getElementById("sex")?.value || null,
+        ward: document.getElementById("ward")?.value || null
+      };
+      state.vitals = {
+        bp: (document.getElementById("bp")?.value || "").trim(),
+        pr: (document.getElementById("pr")?.value || "").trim(),
+        rr: (document.getElementById("rr")?.value || "").trim(),
+        temp: (document.getElementById("temp")?.value || "").trim(),
+        spo2: (document.getElementById("spo2")?.value || "").trim()
+      };
+
+      const wardKey = state.demographics?.ward || "medical";
+      const durSuffix = state.ccDuration ? ` (${state.ccDuration})` : "";
+      const banner = document.getElementById("ccContextBanner");
+      if (banner) {
+        banner.textContent = `Chief Complaint${durSuffix}: "${state.cc}" — ከዚህ በታች ህመሙን የሚለዩ (Characterize የሚያደርጉ) ምልክቶች ተመንጭተዋል፦`;
+      }
+
+      const dynamicSyms = generateCharacterizingSymptoms(state.cc, wardKey, state.vitals);
+      const wrap = document.getElementById("symptomChips");
+      if (wrap) {
+        wrap.innerHTML = "";
+        dynamicSyms.forEach(sym => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "chip" + (state.symptoms.has(sym) ? " active" : "");
+          b.textContent = sym;
+          b.onclick = () => {
+            if (state.symptoms.has(sym)) state.symptoms.delete(sym);
+            else state.symptoms.add(sym);
+            b.classList.toggle("active");
+          };
+          wrap.appendChild(b);
+        });
+      }
+      showStep("step2");
+    }
+
+    function goStep3() {
+      const guide = getActiveGuide();
+      const box = document.getElementById("investigationList");
+      if (box) {
+        box.innerHTML = "";
+        guide.investigations.forEach(inv => {
+          if (!state.invResults[inv.id]) state.invResults[inv.id] = "None";
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `<h3>${inv.name}</h3>`;
+          const chips = document.createElement("div");
+          chips.className = "chips";
+
+          inv.options.forEach(opt => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "chip" + (state.invResults[inv.id] === opt ? " active" : "");
+            b.textContent = opt;
+            b.onclick = () => {
+              state.invResults[inv.id] = opt;
+              chips.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+              b.classList.add("active");
+            };
+            chips.appendChild(b);
+          });
+
+          card.appendChild(chips);
+          box.appendChild(card);
+        });
+      }
+      showStep("step3");
+    }
+
+    function goStep4() {
+      if (!state.caseCountedThisRun) {
+        casesCompleted += 1;
+        state.caseCountedThisRun = true;
+        try {
+          localStorage.setItem(USAGE_KEY, String(casesCompleted));
+        } catch (e) {}
+        renderUsageUI();
+      }
+
+      const wardKey = state.demographics?.ward || "medical";
+      const symArr = [...state.symptoms];
+      const symList = symArr.join(", ") || "None selected";
+      const invSummary = Object.entries(state.invResults)
+        .map(([k, v]) => `${k.toUpperCase()}: ${v}`).join(" | ") || "None";
+      const plan = buildClinicalPlan(wardKey, state.cc, state.ccDuration, symArr, state.invResults, state.demographics, state.vitals);
+      const combinedText = `${state.cc} ${state.ccDuration} ${symArr.join(" ")} ${Object.values(state.invResults).join(" ")}`.toLowerCase();
+      const alerts = buildSafetyAlerts(state.vitals, state.demographics, combinedText);
+      const alertHtml = alerts.length
+        ? `<div class="alert-box"><strong>Clinical Safety & Danger Signs Alerts:</strong><ul>${alerts.map(a => `<li>${a}</li>`).join("")}</ul></div>`
+        : "";
+      const teachHtml = `<div class="teach-box"><strong>Teaching — Key Clinical Clues:</strong> ${plan.clues}<br/><strong>STG 4th Ed. Evidence & Treatment Rationale:</strong> ${plan.rationale}</div>`;
+      const customNote = customWardUpdates[wardKey]
+        ? `<p><strong>Saved Owner STG Note (${customWardUpdates[wardKey].title}):</strong> ${customWardUpdates[wardKey].note}</p>`
+        : "";
+      const bpText = state.vitals?.bp ? ` • <strong>BP:</strong> ${state.vitals.bp}` : "";
+      const durText = state.ccDuration ? ` (${state.ccDuration})` : "";
+
+      const summaryEl = document.getElementById("finalSummary");
+      if (summaryEl) {
+        summaryEl.innerHTML = `
+          ${alertHtml}
+          <h3>Diagnosis</h3>
+          <p><strong>${plan.diagnosis}</strong></p>
+          <p><strong>Chief Complaint:</strong> ${state.cc}${durText}</p>
+          <p><strong>Ward:</strong> ${wardKey}${bpText} • <strong>Characterizing Symptoms:</strong> ${symList}</p>
+          <p><strong>Investigations:</strong> ${invSummary}</p>
+          ${teachHtml}
+          ${customNote}
+
+          <h3>First-Line Pharmacological Treatment (Drug • Dose • Route • Duration)</h3>
+          <ul>${plan.firstLine.map(x => `<li>${x}</li>`).join("")}</ul>
+
+          <h3>Second-Line Pharmacological Treatment (Drug • Dose • Route • Duration)</h3>
+          <ul>${plan.secondLine.map(x => `<li>${x}</li>`).join("")}</ul>
+
+          <h3>Surgical / Palliative / Obstetric Intervention (STG 4th Ed.)</h3>
+          <ul><li>${plan.surgical}</li></ul>
+
+          <h3>Nutritional Recommendations</h3>
+          <ul><li>${plan.nutrition}</li></ul>
+
+          <h3>Non-Pharmacological / Psychosocial / Spiritual Care</h3>
+          <ul><li>${plan.nonPharm}</li></ul>
+
+          <p class="note-warn">Educational & clinical decision support grounded in Ethiopian STG 4th Edition principles; always confirm exact STG 4th Ed. tables, patient weight/age/pregnancy, allergies, and clinical judgment.</p>
+        `;
+      }
+      showStep("step4");
+    }
+
+    function resetApp() {
+      state.symptoms.clear();
+      state.invResults = {};
+      state.ccDuration = "";
+      state.caseCountedThisRun = false;
+      if (document.getElementById("cc")) document.getElementById("cc").value = "";
+      if (document.getElementById("ccDuration")) document.getElementById("ccDuration").value = "";
+      showStep("step1");
+    }
+
+    function selectPlan(planName) {
+      document.getElementById("planStatus").textContent =
+        `Selected: ${planName}. Connect backend /api/subscriptions/checkout and /api/usage/consume with Chapa/Telebirr to process live payments and usage metering.`;
+    }
+
+    function unlockOwnerPanel() {
+      const entered = (document.getElementById("ownerPinInput")?.value || "").trim();
+      const msgEl = document.getElementById("ownerLockMsg");
+      if (entered === ownerPin) {
+        document.getElementById("ownerLockSection").style.display = "none";
+        document.getElementById("ownerEditorSection").style.display = "block";
+        if (msgEl) msgEl.textContent = "";
+      } else if (msgEl) {
+        msgEl.textContent = "Invalid Owner PIN.";
+      }
+    }
+
+    function lockOwnerPanel() {
+      document.getElementById("ownerEditorSection").style.display = "none";
+      document.getElementById("ownerLockSection").style.display = "block";
+      if (document.getElementById("ownerPinInput")) document.getElementById("ownerPinInput").value = "";
+    }
+
+    function changeOwnerPin() {
+      const nextPin = (document.getElementById("newOwnerPin")?.value || "").trim();
+      if (!nextPin || nextPin.length < 4) {
+        document.getElementById("adminMsg").textContent = "Please enter a new Owner PIN of at least 4 characters.";
+        return;
+      }
+      ownerPin = nextPin;
+      try {
+        localStorage.setItem(PIN_KEY, ownerPin);
+      } catch (e) {}
+      document.getElementById("newOwnerPin").value = "";
+      document.getElementById("adminMsg").textContent = "Owner PIN updated successfully.";
+    }
+
+    function saveAdminStg() {
+      const ward = document.getElementById("admWard").value;
+      const title = document.getElementById("admTitle").value.trim();
+      const note = document.getElementById("admNote").value.trim();
+      if (!title || !note) {
+        document.getElementById("adminMsg").textContent = "Please enter both Title and STG update note.";
+        return;
+      }
+      customWardUpdates[ward] = { title, note };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(customWardUpdates));
+      } catch (e) {}
+      document.getElementById("adminMsg").textContent = `Saved ${ward} STG 4th Ed. update ("${title}") and formatted release snippet.`;
+
+      const snippet = JSON.stringify({
+        guideline: "Ethiopian STG 4th Edition",
+        ward,
+        title,
+        note,
+        updatedAt: new Date().toISOString()
+      }, null, 2);
+      document.getElementById("updateExportSnippet").textContent = snippet;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderUsageUI();
+      const nextBtn = document.getElementById("step1NextBtn");
+      if (nextBtn) {
+        nextBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          goStep2();
+        });
+      }
+    });
+  </script>
+</body>
+</html>
